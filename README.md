@@ -1,3 +1,4 @@
+[![Java CI with Gradle](https://github.com/richardwwalter/techtest/actions/workflows/gradle.yml/badge.svg)](https://github.com/richardwwalter/techtest/actions/workflows/gradle.yml)
 ## Solution for tech test
 ### Richard Walter
 
