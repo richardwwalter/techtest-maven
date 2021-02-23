@@ -1,7 +1,7 @@
-##Solution for tech test
+## Solution for tech test
 ### Richard Walter
 
-###Some Notes:
+### Some Notes:
 
 ### Approach to unreliable hadoop service
 I have wrapped this unreliable service in retries,and a circuit breaker.
