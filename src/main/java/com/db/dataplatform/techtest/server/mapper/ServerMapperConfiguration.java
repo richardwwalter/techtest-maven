@@ -12,7 +12,8 @@ public class ServerMapperConfiguration {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration()
                 .setFieldMatchingEnabled(true);
-
+        modelMapper.getConfiguration().setFullTypeMatchingRequired(false);
         return modelMapper;
     }
+
 }

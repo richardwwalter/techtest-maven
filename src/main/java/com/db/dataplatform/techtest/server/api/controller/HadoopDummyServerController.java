@@ -42,7 +42,7 @@ public class HadoopDummyServerController {
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).build();
         }
 
-        log.info("Saving to Hadoop file system - finished");
+        log.info("Saved to Hadoop file system successfully");
         return ResponseEntity.ok().build();
     }
 }

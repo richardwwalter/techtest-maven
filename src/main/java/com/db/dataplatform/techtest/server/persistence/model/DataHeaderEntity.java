@@ -1,19 +1,12 @@
 package com.db.dataplatform.techtest.server.persistence.model;
 
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
@@ -23,6 +16,8 @@ import java.time.Instant;
 )
 @Setter
 @Getter
+@EqualsAndHashCode
+@ToString
 public class DataHeaderEntity {
 
     @Id
@@ -36,11 +31,15 @@ public class DataHeaderEntity {
 
     @Column(name = "BLOCKTYPE")
     @Enumerated(EnumType.STRING)
-    private BlockTypeEnum blocktype;
+    private BlockTypeEnum blockType;
 
 
     @Column(name = "CREATED_TIMESTAMP")
+    @EqualsAndHashCode.Exclude
     private Instant createdTimestamp;
+
+    @Column(name = "DATA_CHECKSUM")
+    private String dataChecksum;
 
     @PrePersist
     public void setTimestamps() {
@@ -48,4 +47,5 @@ public class DataHeaderEntity {
             createdTimestamp = Instant.now();
         }
     }
+
 }

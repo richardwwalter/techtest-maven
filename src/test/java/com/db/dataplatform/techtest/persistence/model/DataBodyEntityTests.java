@@ -21,7 +21,7 @@ public class DataBodyEntityTests {
 
         DataHeaderEntity dataHeaderEntity = new DataHeaderEntity();
         dataHeaderEntity.setName(TEST_NAME);
-        dataHeaderEntity.setBlocktype(BlockTypeEnum.BLOCKTYPEA);
+        dataHeaderEntity.setBlockType(BlockTypeEnum.BLOCKTYPEA);
         dataHeaderEntity.setCreatedTimestamp(expectedTimestamp);
 
         DataBodyEntity dataBodyEntity = createTestDataBodyEntity(dataHeaderEntity);
@@ -30,24 +30,24 @@ public class DataBodyEntityTests {
         assertThat(dataBodyEntity.getDataBody()).isNotNull();
     }
 
-    /**
-     * This test intentionally fails and the code it tests against will need to be fixed.
-     */
     @Test
     public void checkTwoDataBodiesAreEqualAsExpected() {
 
         DataHeaderEntity dataHeaderEntity1 = new DataHeaderEntity();
         dataHeaderEntity1.setName(TEST_NAME);
-        dataHeaderEntity1.setBlocktype(BlockTypeEnum.BLOCKTYPEA);
+        dataHeaderEntity1.setBlockType(BlockTypeEnum.BLOCKTYPEA);
         dataHeaderEntity1.setCreatedTimestamp(Instant.now());
         DataBodyEntity dataBodyEntity1 = createTestDataBodyEntity(dataHeaderEntity1);
 
         DataHeaderEntity dataHeaderEntity2 = new DataHeaderEntity();
         dataHeaderEntity2.setName(TEST_NAME);
-        dataHeaderEntity2.setBlocktype(BlockTypeEnum.BLOCKTYPEA);
+        dataHeaderEntity2.setBlockType(BlockTypeEnum.BLOCKTYPEA);
         dataHeaderEntity2.setCreatedTimestamp(Instant.now().plusSeconds(100L));
         DataBodyEntity dataBodyEntity2 = createTestDataBodyEntity(dataHeaderEntity2);
 
         assertThat(dataBodyEntity1).isEqualTo(dataBodyEntity2);
+        dataBodyEntity1.setDataStoreId(-999L);
+        assertThat(dataBodyEntity1).isNotEqualTo(dataBodyEntity2);
+
     }
 }

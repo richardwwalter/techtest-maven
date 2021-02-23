@@ -1,55 +1,50 @@
 package com.db.dataplatform.techtest.service;
 
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
-import com.db.dataplatform.techtest.server.mapper.ServerMapperConfiguration;
-import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
-import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
+import com.db.dataplatform.techtest.server.component.impl.SaveAndPublishedStatus;
 import com.db.dataplatform.techtest.server.service.DataBodyService;
 import com.db.dataplatform.techtest.server.component.Server;
 import com.db.dataplatform.techtest.server.component.impl.ServerImpl;
+import com.db.dataplatform.techtest.server.service.DataHeaderService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.modelmapper.ModelMapper;
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataEnvelopeApiObject;
+import static com.db.dataplatform.techtest.server.component.impl.SaveAndPublishedStatus.SaveAndPublishStatus.SAVED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServerServiceTests {
 
     @Mock
     private DataBodyService dataBodyServiceImplMock;
+    @Mock
+    private DataHeaderService dataHeaderServiceImplMock;
 
-    private ModelMapper modelMapper;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
-    private DataBodyEntity expectedDataBodyEntity;
     private DataEnvelope testDataEnvelope;
 
     private Server server;
 
     @Before
     public void setup() {
-        ServerMapperConfiguration serverMapperConfiguration = new ServerMapperConfiguration();
-        modelMapper = serverMapperConfiguration.createModelMapperBean();
-
         testDataEnvelope = createTestDataEnvelopeApiObject();
-        expectedDataBodyEntity = modelMapper.map(testDataEnvelope.getDataBody(), DataBodyEntity.class);
-        expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(testDataEnvelope.getDataHeader(), DataHeaderEntity.class));
-
-        server = new ServerImpl(dataBodyServiceImplMock, modelMapper);
+        server = new ServerImpl(dataBodyServiceImplMock, dataHeaderServiceImplMock, applicationEventPublisher);
+        when(dataBodyServiceImplMock.save(testDataEnvelope)).thenReturn(testDataEnvelope);
     }
 
     @Test
-    public void shouldSaveDataEnvelopeAsExpected() throws NoSuchAlgorithmException, IOException {
-        boolean success = server.saveDataEnvelope(testDataEnvelope);
-
-        assertThat(success).isTrue();
-        //verify(dataBodyServiceImplMock, times(1)).saveDataBody(eq(expectedDataBodyEntity));
+    public void shouldSaveDataEnvelopeAsExpected() {
+        SaveAndPublishedStatus<DataEnvelope> status = server.saveDataEnvelope(testDataEnvelope);
+        assertThat(status).isNotNull();
+        assertThat(status.getStatus()).isEqualTo(SAVED);
+        verify(dataBodyServiceImplMock, times(1)).save(testDataEnvelope);
     }
 }

@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(MockitoJUnitRunner.class)
 public class DataHeaderEntityTests {
 
-
     @Test
     public void assignDataHeaderEntityFieldsShouldWorkAsExpected() {
         Instant expectedTimestamp = Instant.now();
@@ -23,8 +22,26 @@ public class DataHeaderEntityTests {
         DataHeaderEntity dataHeaderEntity = TestDataHelper.createTestDataHeaderEntity(expectedTimestamp);
 
         assertThat(dataHeaderEntity.getName()).isEqualTo(TEST_NAME);
-        assertThat(dataHeaderEntity.getBlocktype()).isEqualTo(BlockTypeEnum.BLOCKTYPEA);
+        assertThat(dataHeaderEntity.getBlockType()).isEqualTo(BlockTypeEnum.BLOCKTYPEA);
         assertThat(dataHeaderEntity.getCreatedTimestamp()).isEqualTo(expectedTimestamp);
+    }
+
+    @Test
+    public void checkTwoDataHeadersAreEqualAsExpected() {
+
+        DataHeaderEntity dataHeaderEntity1 = new DataHeaderEntity();
+        dataHeaderEntity1.setName(TEST_NAME);
+        dataHeaderEntity1.setBlockType(BlockTypeEnum.BLOCKTYPEA);
+        dataHeaderEntity1.setCreatedTimestamp(Instant.now());
+
+        DataHeaderEntity dataHeaderEntity2 = new DataHeaderEntity();
+        dataHeaderEntity2.setName(TEST_NAME);
+        dataHeaderEntity2.setBlockType(BlockTypeEnum.BLOCKTYPEA);
+        dataHeaderEntity2.setCreatedTimestamp(Instant.now().plusSeconds(100L));
+
+        assertThat(dataHeaderEntity1).isEqualTo(dataHeaderEntity2);
+        dataHeaderEntity1.setDataHeaderId(-999L);
+        assertThat(dataHeaderEntity1).isNotEqualTo(dataHeaderEntity2);
     }
 
 
