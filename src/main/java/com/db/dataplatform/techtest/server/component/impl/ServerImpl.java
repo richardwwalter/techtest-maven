@@ -28,7 +28,7 @@ public class ServerImpl implements Server {
 
     /**
      * @param envelope - the envelope to save
-     * @return true if there is a match with the client provided checksum.
+     * @return SaveAndPublishedStatus which indicates the status of saving and hadoop publishing
      */
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
