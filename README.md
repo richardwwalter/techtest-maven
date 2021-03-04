@@ -1,3 +1,7 @@
+[![Java CI with Gradle](https://github.com/richardwwalter/techtest/actions/workflows/gradle.yml/badge.svg)](https://github.com/richardwwalter/techtest/actions/workflows/gradle.yml)
+
+## Swagger UI http://localhost:8090/swagger-ui/
+
 ## Solution for tech test
 ### Richard Walter
 

@@ -42,7 +42,7 @@ public class TransactionAwareHadoopPublisher {
 
             /*
              At present if the hadoop service is unavailable or repeatedly fails
-             this implementation will discard the hadoop update - but ensure the data is saved in teh db
+             this implementation will discard the hadoop update - but ensure the data is saved in the db
              if all data must get to hadoop then some additional state will be required here
              to store the failed hadoop updates
              best done by replacing with a message queue

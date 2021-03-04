@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.3.1.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
+	id 'com.bmuschko.docker-remote-api' version '6.7.0'
 }
 
 group = 'com.db.dataplatform'
@@ -17,6 +18,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.retry:spring-retry:1.2.4.RELEASE'
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 	runtimeOnly 'com.h2database:h2'
 	compileOnly 'org.projectlombok:lombok'
 	compile group: 'org.modelmapper.extensions', name: 'modelmapper-spring', version: '2.3.8'
