@@ -17,7 +17,7 @@ This will ensure no loss of data to hadoop as messages will be stored until hado
 As the hadoop service is potentially so slow we don't want to keep a transaction open for the whole time we are interacting with hadoop.
 So hadoop publishing is done as part of post commit processing. i.e. after the database transaction has committed.
 
-This policy may not be what is required and you may simply want to fail the whole transaction and report failure to the caller.
+This policy may not be what is required, and you may simply want to fail the whole transaction and report failure to the caller.
 This is really just throwing the problem upstream through.
 
 If failing the whole transaction if hadoop update fails is what is required then I am happy to update the solution to reflect this requirement.
@@ -35,3 +35,33 @@ I haven't used lombok in the past so again there may be some optimisations that 
 
 ### Other dependencies
 Introducing some other dependencies would improve and simplify the code 
+
+### Gradle
+gradlew help
+gradlew tasks
+gradlew clean build
+gradlew install
+gradlew bootRun
+
+### Docker
+
+docker info
+docker images
+docker ls
+docker ps
+docker container ls
+docker stop 42dd1642dab8
+docker build -t richardwwalter/tech-test-service .
+docker login
+docker push richardwwalter/tech-test-service
+
+### Kubernetes
+
+#### Check env
+kubectl get nodes
+
+#### Deploy configured services and deployments in kube folder
+kubectl apply -f kub
+
+#### Watch pod status
+kubectl get pods --watch
