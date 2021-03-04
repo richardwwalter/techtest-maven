@@ -56,7 +56,7 @@ docker login
 docker push richardwwalter/tech-test-service
 
 ### Kubernetes
-
+See https://kubernetes.io/docs/reference/kubectl/cheatsheet/
 #### Check env
 kubectl get nodes
 
@@ -68,3 +68,6 @@ kubectl get pods --watch
 
 #### Scale the app
 kubectl scale --replicas=2 deployment/tech-test
+
+#### View Log
+kubectl logs tech-test-8768d885d-2znlz
