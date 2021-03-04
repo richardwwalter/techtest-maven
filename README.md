@@ -65,3 +65,6 @@ kubectl apply -f kub
 
 #### Watch pod status
 kubectl get pods --watch
+
+#### Scale the app
+kubectl scale --replicas=2 deployment/tech-test
