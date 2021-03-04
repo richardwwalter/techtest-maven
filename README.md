@@ -45,15 +45,15 @@ gradlew bootRun
 
 ### Docker
 
-docker info
-docker images
-docker ls
-docker ps
-docker container ls
-docker stop 42dd1642dab8
-docker build -t richardwwalter/tech-test-service .
-docker login
-docker push richardwwalter/tech-test-service
+######docker info
+######docker images
+######docker ls
+######docker ps
+######docker container ls
+######docker stop 42dd1642dab8
+######docker build -t richardwwalter/tech-test-service .
+######docker login
+######docker push richardwwalter/tech-test-service
 
 ### Kubernetes
 See https://kubernetes.io/docs/reference/kubectl/cheatsheet/
