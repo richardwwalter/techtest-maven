@@ -20,11 +20,11 @@ dependencies {
     implementation 'org.springframework.retry:spring-retry:1.2.4.RELEASE'
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 	runtimeOnly 'com.h2database:h2'
-	compileOnly 'org.projectlombok:lombok'
+	compileOnly 'org.projectlombok:lombok:1.18.16'
 	compile group: 'org.modelmapper.extensions', name: 'modelmapper-spring', version: '2.3.8'
 	compile group: 'org.apache.httpcomponents', name: 'httpclient'
 
-	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok:1.18.16'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testCompile group: 'org.assertj', name: 'assertj-core', version: '3.4.1'
 	testImplementation 'org.awaitility:awaitility:3.1.6'
