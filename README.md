@@ -1,4 +1,5 @@
 [![Java CI with Maven](https://github.com/richardwwalter/techtest-maven/actions/workflows/maven.yml/badge.svg)](https://github.com/richardwwalter/techtest-maven/actions/workflows/maven.yml)
+![Coverage](https://github.com/richardwwalter/techtest-maven/tree/master/.github/badges/jacoco.svg)
 
 ## Swagger UI http://localhost:8090/swagger-ui/
 
