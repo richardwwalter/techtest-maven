@@ -1,0 +1,14 @@
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/service/ServerServiceTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/component/impl/ServerTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/service/DataHeaderServiceTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/api/model/DataEnvelopeTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/persistence/model/DataBodyEntityTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/component/impl/hadoop/HadoopPublisherTest.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/ApplicationTest.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/api/controller/ServerControllerComponentTest.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/api/model/DataBodyTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/persistence/model/DataHeaderEntityTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/service/DataBodyServiceTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/TestDataHelper.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/api/model/DataHeaderTests.java
+/home/runner/work/techtest-maven/techtest-maven/src/test/java/com/db/dataplatform/techtest/RetryTestHelper.java

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RestResponseEntityExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">techtest-maven</a> &gt; <a href="index.source.html" class="el_package">com.db.dataplatform.techtest.server.api</a> &gt; <span class="el_source">RestResponseEntityExceptionHandler.java</span></div><h1>RestResponseEntityExceptionHandler.java</h1><pre class="source lang-java linenums">package com.db.dataplatform.techtest.server.api;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import javax.validation.ConstraintViolationException;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@ControllerAdvice
+<span class="fc" id="L21">public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {</span>
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    protected ResponseEntity&lt;Object&gt; handleConflict(ConstraintViolationException ex, WebRequest request) {
+
+<span class="nc" id="L26">        String bodyOfResponse = &quot;Provided input parameters have not met validation requirements. &quot; + ex.getMessage();</span>
+<span class="nc" id="L27">        return handleExceptionInternal(ex, bodyOfResponse,</span>
+                new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    protected ResponseEntity&lt;Object&gt; handleDatabaseError(DataAccessException ex, WebRequest request) {
+
+<span class="nc" id="L34">        String bodyOfResponse = &quot;Database action failed : &quot; + ex.getMessage();</span>
+<span class="nc" id="L35">        return handleExceptionInternal(ex, bodyOfResponse,</span>
+                new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
+    @Override
+    protected ResponseEntity&lt;Object&gt; handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                 HttpHeaders headers,
+                                 HttpStatus status, WebRequest request) {
+
+<span class="nc" id="L44">        Map&lt;String, Object&gt; body = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L45">        body.put(&quot;timestamp&quot;, new Date());</span>
+<span class="nc" id="L46">        body.put(&quot;status&quot;, status.value());</span>
+
+<span class="nc" id="L48">        List&lt;String&gt; errors = ex.getBindingResult()</span>
+<span class="nc" id="L49">                .getFieldErrors()</span>
+<span class="nc" id="L50">                .stream()</span>
+<span class="nc" id="L51">                .map(x -&gt; &quot;Field &quot; + x.getField() + &quot; &quot; + x.getDefaultMessage())</span>
+<span class="nc" id="L52">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L54">        body.put(&quot;errors&quot;, errors);</span>
+<span class="nc" id="L55">        return new ResponseEntity&lt;&gt;(body, headers, status);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

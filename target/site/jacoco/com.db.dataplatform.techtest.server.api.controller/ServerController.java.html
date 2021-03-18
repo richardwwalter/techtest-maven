@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServerController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">techtest-maven</a> &gt; <a href="index.source.html" class="el_package">com.db.dataplatform.techtest.server.api.controller</a> &gt; <span class="el_source">ServerController.java</span></div><h1>ServerController.java</h1><pre class="source lang-java linenums">package com.db.dataplatform.techtest.server.api.controller;
+
+import com.db.dataplatform.techtest.ServiceConfiguration;
+import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
+import com.db.dataplatform.techtest.server.component.Server;
+import com.db.dataplatform.techtest.server.component.impl.SaveAndPublishedStatus;
+import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.http.MediaType.*;
+
+<span class="fc" id="L26">@Slf4j</span>
+@Controller
+@RequestMapping(&quot;/dataserver&quot;)
+<span class="fc" id="L29">@RequiredArgsConstructor</span>
+@Validated
+public class ServerController {
+
+    private final ServiceConfiguration config;
+    private final Server server;
+
+    @PostMapping(value = &quot;/pushdata&quot;, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity&lt;Boolean&gt; pushData(@NotNull @NotBlank @Size(min = 32, max=32) @RequestHeader(&quot;MD5_CHECKSUM&quot;) String md5Checksum ,
+                                             @Valid @RequestBody DataEnvelope dataEnvelope) {
+
+<span class="fc" id="L40">        log.info(&quot;Data envelope received: {}&quot;, dataEnvelope.getDataHeader().getName());</span>
+
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if(!verifyChecksum(dataEnvelope, md5Checksum)){</span>
+<span class="fc" id="L43">            log.error(&quot;Checksum validation failed&quot;);</span>
+<span class="fc" id="L44">            return ResponseEntity.status(HttpStatus.CONFLICT).body(false);</span>
+        }
+<span class="fc" id="L46">        dataEnvelope.setDataChecksum(md5Checksum);</span>
+<span class="fc" id="L47">        SaveAndPublishedStatus&lt;DataEnvelope&gt; saved = server.saveDataEnvelope(dataEnvelope);</span>
+
+<span class="fc" id="L49">        long id = saved.getEntity().getDataBody().getId();</span>
+<span class="fc" id="L50">        log.info(&quot;Data envelope pushed name:{} id:{} status:{}&quot;, dataEnvelope.getDataHeader().getName(), id, saved.getStatus());</span>
+<span class="fc" id="L51">        return ResponseEntity.created(config.getURI_GETBYID().expand(id)).body(true);</span>
+    }
+
+    @GetMapping(value = &quot;/data/{blockType}&quot;, produces = APPLICATION_JSON_VALUE)
+    ResponseEntity&lt;List&lt;DataEnvelope&gt;&gt; findBlocksForType(@NotNull @PathVariable(&quot;blockType&quot;) BlockTypeEnum blockType) {
+<span class="fc" id="L56">        log.info(&quot;Finding all blocks for type {}&quot;,blockType);</span>
+<span class="fc" id="L57">        return ResponseEntity.ok(server.findAllBlocksForType(blockType));</span>
+    }
+
+    @GetMapping(value = &quot;/data/id/{id}&quot;, produces = APPLICATION_JSON_VALUE)
+    ResponseEntity&lt;DataEnvelope&gt; findBlockById(@NotNull @PathVariable(&quot;id&quot;) Long id) {
+
+<span class="nc" id="L63">        Optional&lt;DataEnvelope&gt; data = server.findBlockById(id);</span>
+<span class="nc" id="L64">        return data.map(ResponseEntity::ok).orElseGet(() -&gt; ResponseEntity.notFound().build());</span>
+    }
+
+    @GetMapping(value = &quot;/data/name/{name}&quot;, produces = APPLICATION_JSON_VALUE)
+    ResponseEntity&lt;DataEnvelope&gt; findBlockByName(@NotNull @NotBlank @PathVariable(&quot;name&quot;) String name) {
+
+<span class="nc" id="L70">        Optional&lt;DataEnvelope&gt; data = server.findBlockByName(name);</span>
+<span class="nc" id="L71">        return data.map(ResponseEntity::ok).orElseGet(() -&gt; ResponseEntity.notFound().build());</span>
+    }
+
+    @PatchMapping(value = &quot;/update/{name}/{newBlockType}&quot;, produces = APPLICATION_JSON_VALUE)
+    ResponseEntity&lt;HttpStatus&gt; updateBlock(@NotNull @NotBlank @Valid @Size(min = 5, max=30) @PathVariable(&quot;name&quot;) String blockName,
+                                  @NotNull @Valid @PathVariable(&quot;newBlockType&quot;) BlockTypeEnum blockType) {
+
+<span class="fc" id="L78">        log.info(&quot;Changing block name {}to type {}&quot;,blockName,blockType);</span>
+
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if(!server.updateBlockType(blockName, blockType) ){</span>
+<span class="fc" id="L81">            return ResponseEntity.noContent().build();</span>
+        }
+<span class="fc" id="L83">        return ResponseEntity.ok(HttpStatus.OK);</span>
+    }
+
+    private boolean verifyChecksum(DataEnvelope data, String md5Checksum){
+<span class="fc" id="L87">        return md5Checksum.equals (DigestUtils.md5Hex(data.getDataBody().getDataBody()));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
