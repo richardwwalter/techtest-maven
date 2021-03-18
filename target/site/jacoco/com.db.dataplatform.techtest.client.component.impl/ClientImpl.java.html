@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">techtest-maven</a> &gt; <a href="index.source.html" class="el_package">com.db.dataplatform.techtest.client.component.impl</a> &gt; <span class="el_source">ClientImpl.java</span></div><h1>ClientImpl.java</h1><pre class="source lang-java linenums">package com.db.dataplatform.techtest.client.component.impl;
+
+import com.db.dataplatform.techtest.ServiceConfiguration;
+import com.db.dataplatform.techtest.client.api.model.DataEnvelope;
+import com.db.dataplatform.techtest.client.component.Client;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.retry.support.RetrySynchronizationManager.getContext;
+/**
+ * Client code does not require any test coverage
+ *
+ * In a production system would be invoking via a service gateway(dynamic load balancer) such as Zuul
+ * Backed by a service registry such as Eureka
+ * Would also be using https and adding authentication
+ * Would prefer to use WebClient instead of legacy RestTemplate if it was available
+ */
+@Service
+<span class="fc" id="L31">@Slf4j</span>
+<span class="fc" id="L32">@RequiredArgsConstructor</span>
+public class ClientImpl implements Client {
+
+<span class="fc" id="L35">    private static final ParameterizedTypeReference&lt;List&lt;DataEnvelope&gt;&gt; LIST_DATA_TYPE = new ParameterizedTypeReference&lt;List&lt;DataEnvelope&gt;&gt;(){};</span>
+
+    private final ServiceConfiguration config;
+    private final RestTemplate restTemplate;
+
+    /**
+     * Posts a single DataEnvelope to the server
+     * Will retry a number of times on failure - Would be preferable to use a circuit breaker here in preference to Spring Retry
+     * @param dataEnvelope - data to push
+     * @return boolean to indicate if validation and saving to the server was successful
+     */
+    @Override
+    @Retryable( value = RestClientException.class,  maxAttempts = 3, backoff = @Backoff(delay = 100,multiplier = 2))
+    public boolean pushData(DataEnvelope dataEnvelope) {
+<span class="fc" id="L49">        int retryCount = getContext().getRetryCount();</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if ( retryCount &gt; 0){</span>
+<span class="nc" id="L51">            log.warn(&quot;Retry {} Pushing data {} to {}&quot;, retryCount, dataEnvelope.getDataHeader().getName(), config.getURI_PUSHDATA());</span>
+        }else{
+<span class="fc" id="L53">            log.info(&quot;Pushing data {} to {}&quot;, dataEnvelope.getDataHeader().getName(), config.getURI_PUSHDATA());</span>
+        }
+
+<span class="fc" id="L56">        HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L57">        headers.add(&quot;MD5_CHECKSUM&quot;, DigestUtils.md5Hex(dataEnvelope.getDataBody().getDataBody()) );</span>
+
+<span class="fc" id="L59">        HttpEntity&lt;DataEnvelope&gt; requestEntity = new HttpEntity&lt;&gt;(dataEnvelope, headers);</span>
+<span class="fc" id="L60">        ResponseEntity&lt;Boolean&gt; response = restTemplate.postForEntity( config.getURI_PUSHDATA(), requestEntity, Boolean.class);</span>
+
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if( response.getStatusCode().equals(CONFLICT) ){</span>
+<span class="nc" id="L63">            log.error(&quot;Server returned checkSum failed response&quot;);</span>
+<span class="nc" id="L64">            return false;</span>
+        }
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if( response.getStatusCode().equals(CREATED) ){</span>
+<span class="fc" id="L67">            log.info(&quot;New data saved URI: {} &quot;, response.getHeaders().getLocation());</span>
+        }
+<span class="fc" id="L69">        return true;</span>
+    }
+
+    /**
+     * Get a list of data from the server for a particular blockType
+     * @param blockType - block type to filter on
+     * @return - list of matching data envelopes
+     */
+    @Override
+    @Retryable( value = RestClientException.class,  maxAttempts = 3, backoff = @Backoff(delay = 100,multiplier = 2))
+    public List&lt;DataEnvelope&gt; getData(String blockType) {
+
+<span class="fc" id="L81">        int retryCount = getContext().getRetryCount();</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if ( retryCount &gt; 0){</span>
+<span class="nc" id="L83">            log.info(&quot;Retry {} Query for data with header block type {}&quot;,retryCount, blockType);</span>
+        }else{
+<span class="fc" id="L85">            log.info(&quot;Query for data with header block type {}&quot;, blockType);</span>
+        }
+
+<span class="fc" id="L88">        ResponseEntity&lt;List&lt;DataEnvelope&gt;&gt; response = restTemplate.exchange(config.getURI_GETDATA().expand(blockType),</span>
+                        HttpMethod.GET, null, LIST_DATA_TYPE);
+
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        List&lt;DataEnvelope&gt; data = response.hasBody() ? response.getBody() : Collections.emptyList();</span>
+<span class="fc" id="L92">        log.info(&quot;Data query returned {} records&quot;, data.size());</span>
+<span class="fc" id="L93">        return data;</span>
+    }
+
+    /**
+     * Update the blockType for a particular block identified by its name
+     * @param blockName - blockName to update
+     * @param newBlockType - new block type
+     * @return boolean to indicate if update was successful
+     */
+    @Override
+    @Retryable( value = RestClientException.class,  maxAttempts = 3, backoff = @Backoff(delay = 100,multiplier = 2))
+    public boolean updateData(String blockName, String newBlockType) {
+
+<span class="fc" id="L106">        int retryCount = getContext().getRetryCount();</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if ( retryCount &gt; 0){</span>
+<span class="nc" id="L108">            log.info(&quot;Retry {} Updating block type to {} for block with name {}&quot;, retryCount, newBlockType, blockName);</span>
+        }else{
+<span class="fc" id="L110">            log.info(&quot;Updating block type to {} for block with name {}&quot;, newBlockType, blockName);</span>
+        }
+
+<span class="fc" id="L113">        ResponseEntity&lt;HttpStatus&gt; response = restTemplate.exchange(config.getURI_PATCHDATA().expand(blockName, newBlockType),</span>
+                        HttpMethod.PATCH, null, HttpStatus.class);
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if( response.getStatusCode().equals(HttpStatus.NO_CONTENT)){</span>
+<span class="nc" id="L116">            return false;</span>
+        }
+<span class="fc" id="L118">        log.info(&quot;Successfully updated data block name {} &quot;,blockName);</span>
+<span class="fc" id="L119">        return true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
