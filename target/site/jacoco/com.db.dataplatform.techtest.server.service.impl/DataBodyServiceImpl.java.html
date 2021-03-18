@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataBodyServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">techtest-maven</a> &gt; <a href="index.source.html" class="el_package">com.db.dataplatform.techtest.server.service.impl</a> &gt; <span class="el_source">DataBodyServiceImpl.java</span></div><h1>DataBodyServiceImpl.java</h1><pre class="source lang-java linenums">package com.db.dataplatform.techtest.server.service.impl;
+
+import com.db.dataplatform.techtest.server.api.model.DataBody;
+import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
+import com.db.dataplatform.techtest.server.api.model.DataHeader;
+import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
+import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
+import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
+import com.db.dataplatform.techtest.server.persistence.repository.DataStoreRepository;
+import com.db.dataplatform.techtest.server.service.DataBodyService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.dao.RecoverableDataAccessException;
+import org.springframework.dao.TransientDataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.springframework.retry.support.RetrySynchronizationManager.getContext;
+
+@Service
+<span class="fc" id="L30">@RequiredArgsConstructor</span>
+<span class="fc" id="L31">@Slf4j</span>
+public class DataBodyServiceImpl implements DataBodyService {
+
+    private final DataStoreRepository dataStoreRepository;
+    private final ModelMapper modelMapper;
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    @Retryable( value = {RecoverableDataAccessException.class, TransientDataAccessException.class},  maxAttempts = 3, backoff = @Backoff(delay = 100,multiplier = 2))
+    public DataEnvelope save(DataEnvelope envelope) {
+<span class="fc" id="L41">        int retryCount = getContext().getRetryCount();</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if ( retryCount &gt; 0){</span>
+<span class="nc" id="L43">            log.info(&quot;Retry {} Persisting data with attribute name: {}&quot;, retryCount, envelope.getDataHeader().getName());</span>
+        }else{
+<span class="fc" id="L45">            log.info(&quot;Persisting data with attribute name: {}&quot;, envelope.getDataHeader().getName());</span>
+        }
+<span class="fc" id="L47">        return mapToDomain(dataStoreRepository.save(mapToJpaEntity(envelope)));</span>
+    }
+
+    @Override
+    public List&lt;DataEnvelope&gt; getDataByBlockType(BlockTypeEnum blockType) {
+<span class="fc" id="L52">        return dataStoreRepository.findByBlockType(blockType)</span>
+<span class="fc" id="L53">            .stream()</span>
+<span class="fc" id="L54">            .map(this::mapToDomain)</span>
+<span class="fc" id="L55">            .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public Optional&lt;DataEnvelope&gt; getDataByBlockName(String blockName) {
+<span class="fc" id="L60">        Optional&lt;DataBodyEntity&gt; d = dataStoreRepository.findByBlockName(blockName);</span>
+<span class="fc" id="L61">        return d.map(this::mapToDomain);</span>
+    }
+
+    @Override
+    public Optional&lt;DataEnvelope&gt; getDataByBlockId(Long id) {
+<span class="fc" id="L66">        Optional&lt;DataBodyEntity&gt; d = dataStoreRepository.findByDataStoreId(id);</span>
+<span class="fc" id="L67">        return d.map(this::mapToDomain);</span>
+    }
+
+    private DataEnvelope mapToDomain(DataBodyEntity d){
+<span class="fc" id="L71">        DataHeaderEntity dh = d.getDataHeaderEntity();</span>
+<span class="fc" id="L72">        DataHeader h = new DataHeader(dh.getName(),dh.getBlockType(),d.getDataStoreId(),dh.getCreatedTimestamp(),dh.getDataChecksum());</span>
+<span class="fc" id="L73">        DataBody b = new DataBody(d.getDataBody(),d.getDataStoreId(),d.getCreatedTimestamp());</span>
+<span class="fc" id="L74">        return new DataEnvelope(h,b);</span>
+    }
+
+    private DataBodyEntity mapToJpaEntity(DataEnvelope e){
+<span class="fc" id="L78">        DataHeaderEntity dataHeaderEntity = modelMapper.map(e.getDataHeader(), DataHeaderEntity.class);</span>
+<span class="fc" id="L79">        DataBodyEntity dataBodyEntity = modelMapper.map(e.getDataBody(), DataBodyEntity.class);</span>
+<span class="fc" id="L80">        dataBodyEntity.setDataHeaderEntity(dataHeaderEntity);</span>
+<span class="fc" id="L81">        return dataBodyEntity;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
