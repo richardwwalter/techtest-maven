@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataHeaderServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">techtest-maven</a> &gt; <a href="index.source.html" class="el_package">com.db.dataplatform.techtest.server.service.impl</a> &gt; <span class="el_source">DataHeaderServiceImpl.java</span></div><h1>DataHeaderServiceImpl.java</h1><pre class="source lang-java linenums">package com.db.dataplatform.techtest.server.service.impl;
+
+import com.db.dataplatform.techtest.server.api.model.DataHeader;
+import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
+import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
+import com.db.dataplatform.techtest.server.persistence.repository.DataHeaderRepository;
+import com.db.dataplatform.techtest.server.service.DataHeaderService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.dao.RecoverableDataAccessException;
+import org.springframework.dao.TransientDataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+import static org.springframework.retry.support.RetrySynchronizationManager.getContext;
+
+@Service
+<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L25">@RequiredArgsConstructor</span>
+public class DataHeaderServiceImpl implements DataHeaderService {
+
+    private final DataHeaderRepository dataHeaderRepository;
+    private final ModelMapper modelMapper;
+
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    @Retryable( value = {RecoverableDataAccessException.class, TransientDataAccessException.class},  maxAttempts = 3, backoff = @Backoff(delay = 100,multiplier = 2))
+    public DataHeader save(DataHeader header) {
+<span class="fc" id="L36">        int retryCount = getContext().getRetryCount();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if ( retryCount &gt; 0){</span>
+<span class="nc" id="L38">            log.info(&quot;Retry {} Persisting header with attribute name: {}&quot;, retryCount,header.getName());</span>
+        }else{
+<span class="fc" id="L40">            log.info(&quot;Persisting header with attribute name: {}&quot;, header.getName());</span>
+        }
+<span class="fc" id="L42">        return mapToDomain(dataHeaderRepository.save(mapToJpaEntity(header)));</span>
+    }
+
+    @Override
+    public Optional&lt;DataHeader&gt; getByName(String name){
+<span class="fc" id="L47">        Optional&lt;DataHeaderEntity&gt; h = dataHeaderRepository.findByName(name);</span>
+<span class="fc" id="L48">        return h.map(this::mapToDomain);</span>
+    }
+
+    @Override
+    @Retryable( value = {RecoverableDataAccessException.class, TransientDataAccessException.class},  maxAttempts = 3, backoff = @Backoff(delay = 100,multiplier = 2))
+    public boolean updateBlockType(String name, BlockTypeEnum newBlockType){
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        return dataHeaderRepository.updateBlockType(name,newBlockType) == 1;</span>
+    }
+
+    private DataHeader mapToDomain(DataHeaderEntity d){
+<span class="fc" id="L58">        return new DataHeader(d.getName(),d.getBlockType(),d.getDataHeaderId(),d.getCreatedTimestamp(),d.getDataChecksum());</span>
+    }
+
+    private DataHeaderEntity mapToJpaEntity(DataHeader e){
+<span class="fc" id="L62">        return modelMapper.map(e, DataHeaderEntity.class);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
