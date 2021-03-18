@@ -1,19 +1,18 @@
 package com.db.dataplatform.techtest.service;
 
 import com.db.dataplatform.techtest.RetryTestHelper;
-import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.api.model.DataHeader;
 import com.db.dataplatform.techtest.server.mapper.ServerMapperConfiguration;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
 import com.db.dataplatform.techtest.server.persistence.repository.DataHeaderRepository;
 import com.db.dataplatform.techtest.server.service.DataHeaderService;
 import com.db.dataplatform.techtest.server.service.impl.DataHeaderServiceImpl;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import java.time.Instant;
@@ -25,10 +24,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DataHeaderServiceTests {
 
-    @Mock
+    @Mock(lenient = true)
     private DataHeaderRepository dataHeaderRepositoryMock;
 
     private DataHeaderService dataHeaderService;
@@ -37,7 +36,7 @@ public class DataHeaderServiceTests {
 
     private final Instant now = Instant.now();
 
-    @Before
+    @BeforeEach
     public void setup() {
 
         expectedDataHeaderEntity = createTestDataHeaderEntity(now);

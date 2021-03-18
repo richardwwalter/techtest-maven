@@ -11,13 +11,11 @@ import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -41,58 +39,58 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-@RunWith(MockitoJUnitRunner.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class ServerControllerComponentTest {
 
 	public static final String URI_PUSHDATA = "http://localhost:8090/dataserver/pushdata";
 	public static final UriTemplate URI_GETDATA = new UriTemplate("http://localhost:8090/dataserver/data/{blockType}");
 	public static final UriTemplate URI_PATCHDATA = new UriTemplate("http://localhost:8090/dataserver/update/{name}/{newBlockType}");
 
-	@Mock
+	@Mock(lenient = true)
 	private Server serverMock;
 
-	@Mock
+	@Mock(lenient = true)
 	private ServiceConfiguration configMock;
 
 	private DataEnvelope testDataEnvelope;
 	private ObjectMapper objectMapper;
 	private MockMvc mockMvc;
 
-	@Before
-	public void setUp(){
-		ServerController serverController = new ServerController(configMock,serverMock);
-		mockMvc = standaloneSetup(serverController).build();
-		objectMapper = Jackson2ObjectMapperBuilder
-				.json()
-				.build();
+	@BeforeEach
+	public void setUp() {
+			ServerController serverController = new ServerController(configMock, serverMock);
+			mockMvc = standaloneSetup(serverController).build();
+			objectMapper = Jackson2ObjectMapperBuilder
+					.json()
+					.build();
 
-		testDataEnvelope = createTestDataEnvelopeApiObject();
-		when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).then(i-> {
-					DataEnvelope b = i.getArgument(0);
-					DataBody db = b.getDataBody();
-					db.setCreatedTimestamp(Instant.now());
-					db.setId(1L);
-					b.setDataChecksum(DigestUtils.md5Hex(db.getDataBody()));
-					DataHeader dh = b.getDataHeader();
-					dh.setId(1L);
-					dh.setCreatedTimestamp(Instant.now());
-					return new SaveAndPublishedStatus<>(b, SAVED);
-				});
+			testDataEnvelope = createTestDataEnvelopeApiObject();
+			when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).then(i -> {
+				DataEnvelope b = i.getArgument(0);
+				DataBody db = b.getDataBody();
+				db.setCreatedTimestamp(Instant.now());
+				db.setId(1L);
+				b.setDataChecksum(DigestUtils.md5Hex(db.getDataBody()));
+				DataHeader dh = b.getDataHeader();
+				dh.setId(1L);
+				dh.setCreatedTimestamp(Instant.now());
+				return new SaveAndPublishedStatus<>(b, SAVED);
+			});
 
-		when(serverMock.findAllBlocksForType(any(BlockTypeEnum.class))).then(i-> {
-			List<DataEnvelope> result = new ArrayList<>();
-			DataEnvelope e = createTestDataEnvelopeApiObject();
-			e.getDataHeader().setBlockType(i.getArgument(0));
-			result.add(e);
-			return result;
-		});
+			when(serverMock.findAllBlocksForType(any(BlockTypeEnum.class))).then(i -> {
+				List<DataEnvelope> result = new ArrayList<>();
+				DataEnvelope e = createTestDataEnvelopeApiObject();
+				e.getDataHeader().setBlockType(i.getArgument(0));
+				result.add(e);
+				return result;
+			});
 
-		when(serverMock.updateBlockType("TEST_NAME", BlockTypeEnum.BLOCKTYPEB)).then(i-> true);
-		when(serverMock.updateBlockType("BAD_NAME", BlockTypeEnum.BLOCKTYPEB)).then(i-> false);
+			when(serverMock.updateBlockType("TEST_NAME", BlockTypeEnum.BLOCKTYPEB)).then(i -> true);
+			when(serverMock.updateBlockType("BAD_NAME", BlockTypeEnum.BLOCKTYPEB)).then(i -> false);
 
-		when(configMock.getURI_GETBYID()).thenReturn(new UriTemplate("http;//localhost:8090/dataserver/data/id/{id}"));
-		}
+			when(configMock.getURI_GETBYID()).thenReturn(new UriTemplate("http;//localhost:8090/dataserver/data/id/{id}"));
+	}
 
 	@Test
 	public void a_testPushDataPostCallWorksAsExpected() throws Exception {

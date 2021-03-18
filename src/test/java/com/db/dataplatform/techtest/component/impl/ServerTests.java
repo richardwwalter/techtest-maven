@@ -1,22 +1,19 @@
 package com.db.dataplatform.techtest.component.impl;
 
-import com.db.dataplatform.techtest.TestDataHelper;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.component.Server;
 import com.db.dataplatform.techtest.server.component.impl.SaveAndPublishedStatus;
 import com.db.dataplatform.techtest.server.component.impl.ServerImpl;
-import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.service.DataBodyService;
 import com.db.dataplatform.techtest.server.service.DataHeaderService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,25 +22,24 @@ import static com.db.dataplatform.techtest.TestDataHelper.*;
 import static com.db.dataplatform.techtest.server.persistence.BlockTypeEnum.BLOCKTYPEA;
 import static com.db.dataplatform.techtest.server.persistence.BlockTypeEnum.BLOCKTYPEB;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ServerTests {
 
     private Server server;
 
     private DataEnvelope testEnvelope;
 
-    @Mock
+    @Mock(lenient = true)
     private DataBodyService dataBodyPersistenceService;
-    @Mock
+    @Mock(lenient = true)
     private DataHeaderService dataHeaderPersistenceService;
-    @Mock
+    @Mock(lenient = true)
     private ApplicationEventPublisher eventPublisher;
 
-    @Before
+    @BeforeEach
     public void setup(){
         server = new ServerImpl(dataBodyPersistenceService,dataHeaderPersistenceService,eventPublisher);
         testEnvelope = createTestDataEnvelope(createTestDataHeader(Instant.now()));

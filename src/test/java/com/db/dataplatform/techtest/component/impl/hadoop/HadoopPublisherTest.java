@@ -7,12 +7,12 @@ import com.db.dataplatform.techtest.server.api.model.DataHeader;
 import com.db.dataplatform.techtest.server.component.impl.SaveAndPublishedStatus;
 import com.db.dataplatform.techtest.server.component.impl.hadoop.HadoopWithCircuitBreakerAndRetryPublisher;
 import com.db.dataplatform.techtest.server.component.impl.hadoop.TransactionAwareHadoopPublisher;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.RetryPolicy;
@@ -30,7 +30,7 @@ import static com.db.dataplatform.techtest.TestDataHelper.createTestDataHeader;
 import static com.db.dataplatform.techtest.server.component.impl.SaveAndPublishedStatus.SaveAndPublishStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HadoopPublisherTest {
 
     @Mock
@@ -45,7 +45,7 @@ public class HadoopPublisherTest {
 
     private static final String testHadoopUURI = "http:/localhost/test";
 
-    @Before
+    @BeforeEach
     public void setup(){
 
         retryTemplate = new RetryTemplate();

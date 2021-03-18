@@ -6,11 +6,11 @@ import com.db.dataplatform.techtest.server.service.DataBodyService;
 import com.db.dataplatform.techtest.server.component.Server;
 import com.db.dataplatform.techtest.server.component.impl.ServerImpl;
 import com.db.dataplatform.techtest.server.service.DataHeaderService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import static com.db.dataplatform.techtest.TestDataHelper.createTestDataEnvelopeApiObject;
@@ -18,7 +18,7 @@ import static com.db.dataplatform.techtest.server.component.impl.SaveAndPublishe
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ServerServiceTests {
 
     @Mock
@@ -33,7 +33,7 @@ public class ServerServiceTests {
 
     private Server server;
 
-    @Before
+    @BeforeEach
     public void setup() {
         testDataEnvelope = createTestDataEnvelopeApiObject();
         server = new ServerImpl(dataBodyServiceImplMock, dataHeaderServiceImplMock, applicationEventPublisher);

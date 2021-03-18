@@ -1,16 +1,15 @@
 package com.db.dataplatform.techtest.api.model;
 
-
 import com.db.dataplatform.techtest.server.api.model.DataBody;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DataBodyTests {
 
     public static final String DUMMY_DATA = "AKCp5fU4WNWKBVvhXsbNhqk33tawri9iJUkA5o4A6YqpwvAoYjajVw8xdEw6r9796h1wEp29D";
@@ -27,12 +26,10 @@ public class DataBodyTests {
     public void checkTwoDataBodiesAreEqualAsExpected() {
 
         DataBody dataBody = new DataBody("TEST-PAYLOAD");
-        //dataBody.setDataChecksum("123456");
         dataBody.setCreatedTimestamp(Instant.now());
         dataBody.setId(1L);
 
         DataBody dataBody2 = new DataBody("TEST-PAYLOAD");
-        //dataBody2.setDataChecksum("123456");
         dataBody2.setCreatedTimestamp(Instant.now());
         dataBody2.setId(1L);
 
