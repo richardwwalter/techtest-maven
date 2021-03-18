@@ -1,4 +1,4 @@
-[![Java CI with Gradle](https://github.com/richardwwalter/techtest/actions/workflows/gradle.yml/badge.svg)](https://github.com/richardwwalter/techtest/actions/workflows/gradle.yml)
+[![Java CI with Maven](https://github.com/richardwwalter/techtest-maven/actions/workflows/maven.yml/badge.svg)](https://github.com/richardwwalter/techtest-maven/actions/workflows/maven.yml)
 
 ## Swagger UI http://localhost:8090/swagger-ui/
 
