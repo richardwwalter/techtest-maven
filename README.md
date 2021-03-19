@@ -72,3 +72,7 @@ kubectl scale --replicas=2 deployment/tech-test
 
 #### View Log
 kubectl logs tech-test-8768d885d-2znlz
+
+
+#### Auto recompile using Fizzer - useful if you have spring dev tools with auto restart on classpath change
+mvnw fizzed-watcher:run
