@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HadoopWithCircuitBreakerAndRetryPublisher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">techtest-maven</a> &gt; <a href="index.source.html" class="el_package">com.db.dataplatform.techtest.server.component.impl.hadoop</a> &gt; <span class="el_source">HadoopWithCircuitBreakerAndRetryPublisher.java</span></div><h1>HadoopWithCircuitBreakerAndRetryPublisher.java</h1><pre class="source lang-java linenums">package com.db.dataplatform.techtest.server.component.impl.hadoop;
+
+import com.db.dataplatform.techtest.ServiceConfiguration;
+import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
+import com.db.dataplatform.techtest.server.exception.HadoopClientException;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.annotation.CircuitBreaker;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import static org.springframework.retry.support.RetrySynchronizationManager.getContext;
+
+/**
+ * Publish to the hadoop rest service within a circuit breaker context that will retry on failure
+ * And attempt calls again based on the configured timeouts
+ */
+@Component
+<span class="fc" id="L25">@Slf4j</span>
+<span class="fc" id="L26">@AllArgsConstructor</span>
+public class HadoopWithCircuitBreakerAndRetryPublisher {
+
+    private final ServiceConfiguration config;
+    private final RestTemplate restTemplate;
+    private final RetryTemplate retryTemplate;
+
+    @CircuitBreaker(value={HadoopClientException.class}, maxAttempts = 3, openTimeout = 30_000, resetTimeout = 60_000, label=&quot;CB:HADOOP_PUBLISHING&quot;)
+    public void publishWithRetry( DataEnvelope data)  throws HadoopClientException {
+<span class="fc" id="L35">        retryTemplate.execute((RetryCallback&lt;HttpStatus, HadoopClientException&gt;) context -&gt; {</span>
+<span class="fc" id="L36">            int retryCount = getContext().getRetryCount();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if (retryCount &gt; 0) {</span>
+<span class="nc" id="L38">                log.info(&quot;Retry {} Pushing to hadoop&quot;,retryCount);</span>
+            } else {
+<span class="fc" id="L40">                log.info(&quot;Pushing to hadoop&quot;);</span>
+            }
+            try {
+<span class="fc" id="L43">                ResponseEntity&lt;HttpStatus&gt; response = restTemplate.postForEntity(config.getURI_HADOOP_PUSHDATA(), data, HttpStatus.class);</span>
+<span class="fc" id="L44">                log.info(&quot;Successfully published to hadoop on attempt: {} response: {}&quot;, retryCount + 1, response.getStatusCode());</span>
+<span class="fc" id="L45">                return response.getStatusCode();</span>
+<span class="fc" id="L46">            } catch (RestClientException ex) {</span>
+<span class="fc" id="L47">                    throw new HadoopClientException(&quot;Failed to publish to hadoop id &quot; + data.getDataBody().getId() + &quot; Recvd: &quot;</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                            + ((ex instanceof HttpServerErrorException) ? ((HttpServerErrorException)ex).getStatusCode() : ex.getMessage()), ex);</span>
+            }
+        });
+<span class="fc" id="L51">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
